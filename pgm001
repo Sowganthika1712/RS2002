@@ -1,1 +1,60 @@
-Mainframe technology
+   IDENTIFICATION DIVISION.
+   PROGRAM-ID. FILE-COPY.
+
+   ENVIRONMENT DIVISION.
+   INPUT-OUTPUT SECTION.
+   FILE-CONTROL.
+       SELECT INPUT-FILE ASSIGN TO "input.txt"
+           ORGANIZATION IS LINE SEQUENTIAL
+           FILE STATUS IS WS-STATUS-IN.
+       SELECT OUTPUT-FILE ASSIGN TO "output.txt"
+           ORGANIZATION IS LINE SEQUENTIAL
+           FILE STATUS IS WS-STATUS-OUT.
+
+   DATA DIVISION.
+   FILE SECTION.
+   FD INPUT-FILE.
+   01 INPUT-RECORD PIC X(100).
+
+   FD OUTPUT-FILE.
+   01 OUTPUT-RECORD PIC X(100).
+
+   WORKING-STORAGE SECTION.
+   01 WS-EOF PIC X VALUE "N".
+   01 WS-STATUS-IN PIC XX VALUE SPACES.
+   01 WS-STATUS-OUT PIC XX VALUE SPACES.
+
+   PROCEDURE DIVISION.
+   MAIN-PARA.
+       OPEN INPUT INPUT-FILE
+       IF WS-STATUS-IN NOT = "00"
+           DISPLAY "Error opening input file. Status: " WS-STATUS-IN
+           STOP RUN
+       END-IF
+
+       OPEN OUTPUT OUTPUT-FILE
+       IF WS-STATUS-OUT NOT = "00"
+           DISPLAY "Error opening output file. Status: " WS-STATUS-OUT
+           STOP RUN
+       END-IF
+
+       PERFORM UNTIL WS-EOF = "Y"
+           READ INPUT-FILE INTO INPUT-RECORD
+               AT END
+                   MOVE "Y" TO WS-EOF
+               NOT AT END
+                   MOVE INPUT-RECORD TO OUTPUT-RECORD
+                   WRITE OUTPUT-RECORD
+                   IF WS-STATUS-OUT NOT = "00"
+                       DISPLAY "Error writing to output file. Status: " WS-STATUS-OUT
+                       STOP RUN
+                   END-IF
+           END-READ
+       END-PERFORM
+
+       CLOSE INPUT-FILE
+       CLOSE OUTPUT-FILE
+
+       DISPLAY "File copy completed successfully."
+
+       STOP RUN.
